@@ -76,3 +76,38 @@ WITH CTE AS (
 )
 
 SELECT COUNT(company_id) AS duplicate_companies FROM CTE;
+
+-- 9. Assume you're given the tables containing completed trade orders and user details in a Robinhood trading system.
+-- Write a query to retrieve the top three cities that have the highest number of completed trade orders listed in descending order. Output the city name and the corresponding number of completed trade orders.
+
+SELECT city, COUNT(order_id) as total_orders
+FROM trades
+JOIN users on trades.user_id = users.user_id
+WHERE status = 'Completed'
+GROUP BY city
+ORDER BY total_orders DESC
+LIMIT 3;
+
+-- 10. Given the reviews table, write a query to retrieve the average star rating for each product, grouped by month. The output should display the month as a numerical value, product ID, and average star rating rounded to two decimal places. Sort the output first by month and then by product ID.
+
+SELECT DISTINCT(EXTRACT(MONTH from submit_date)) as mth, product_id, ROUND(AVG(stars), 2) as avg_stars
+FROM reviews
+GROUP by mth, product_id
+ORDER BY mth ASC;
+
+-- 11. Assume you have an events table on Facebook app analytics. Write a query to calculate the click-through rate (CTR) for the app in 2022 and round the results to 2 decimal places.
+
+SELECT app_id,
+ROUND(100.0 *
+SUM(CASE WHEN event_type = 'click' THEN 1 ELSE 0 END) /
+SUM(CASE WHEN event_type = 'impression' THEN 1 ELSE 0 END), 2)  AS ctr_rate
+FROM events
+WHERE timestamp BETWEEN '2022-01-01' AND '2022-12-31'
+GROUP BY app_id;
+
+-- 12. Assume you're given tables with information about TikTok user sign-ups and confirmations through email and text. New users on TikTok sign up using their email addresses, and upon sign-up, each user receives a text message confirmation to activate their account. Write a query to display the user IDs of those who did not confirm their sign-up on the first day, but confirmed on the second day.
+
+SELECT DISTINCT user_id
+FROM emails 
+JOIN texts on emails.email_id = texts.email_id
+WHERE signup_action = 'Confirmed' AND action_date = signup_date + INTERVAL '1 day';
