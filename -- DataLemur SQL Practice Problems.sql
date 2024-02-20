@@ -111,3 +111,53 @@ SELECT DISTINCT user_id
 FROM emails 
 JOIN texts on emails.email_id = texts.email_id
 WHERE signup_action = 'Confirmed' AND action_date = signup_date + INTERVAL '1 day';
+
+-- 13. As a data analyst on the Oracle Sales Operations team, you are given a list of salespeople’s deals, and the annual quota they need to hit.
+-- Write a query that outputs each employee id and whether they hit the quota or not ('yes' or 'no'). Order the results by employee id in ascending order.
+
+SELECT DISTINCT deals.employee_id,
+CASE WHEN SUM(deal_size) > quota THEN 'yes' ELSE 'no' END AS made_quota
+FROM deals
+JOIN sales_quotas ON deals.employee_id = sales_quotas.employee_id
+GROUP BY deals.employee_id, quota
+ORDER BY deals.employee_id ASC;
+
+-- 14. Your team at JPMorgan Chase is preparing to launch a new credit card, and to gain some insights, you're analyzing how many credit cards were issued each month.
+-- Write a query that outputs the name of each credit card and the difference in the number of issued cards between the month with the highest issuance cards and the lowest issuance. Arrange the results based on the largest disparity.
+
+SELECT card_name, MAX(issued_amount) - MIN(issued_amount) AS difference
+FROM monthly_cards_issued
+GROUP BY card_name
+ORDER BY difference DESC;
+
+-- 15. You're trying to find the mean number of items per order on Alibaba, rounded to 1 decimal place using tables which includes information on the count of items in each order (item_count table) and the corresponding number of orders for each item count (order_occurrences table).
+
+/*
+WITH CTE AS (
+  SELECT SUM(item_count * order_occurrences) AS total_items, 
+  SUM(order_occurrences) AS total_orders
+  FROM items_per_order
+)
+
+SELECT ROUND(CAST(total_items/total_orders AS NUMERIC), 1) FROM CTE;
+*/ 
+
+SELECT ROUND(CAST(SUM(item_count * order_occurrences) / SUM(order_occurrences) AS NUMERIC), 1) AS mean
+FROM items_per_order;
+
+-- 16A. CVS Health is trying to better understand its pharmacy sales, and how well different products are selling. Each drug can only be produced by one manufacturer.
+-- Write a query to find the top 3 most profitable drugs sold, and how much profit they made. Assume that there are no ties in the profits. Display the result from the highest to the lowest total profit.
+
+SELECT drug, total_sales - cogs AS total_profit
+FROM pharmacy_sales
+ORDER BY total_profit DESC
+LIMIT 3;
+
+-- 16B. Write a query to identify the manufacturers associated with the drugs that resulted in losses for CVS Health and calculate the total amount of losses incurred.
+-- Output the manufacturer's name, the number of drugs associated with losses, and the total losses in absolute value. Display the results sorted in descending order with the highest losses displayed at the top.
+
+SELECT manufacturer, COUNT(drug) as drug_count, ABS(SUM(total_sales - cogs)) as total_loss
+FROM pharmacy_sales
+WHERE total_sales - cogs <= 0
+GROUP BY manufacturer
+ORDER BY total_loss DESC;
