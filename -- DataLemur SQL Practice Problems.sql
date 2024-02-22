@@ -200,3 +200,49 @@ SELECT age_bucket,
 ROUND((sending_time / (sending_time + open_time)) * 100 , 2) as send_perc,
 ROUND((open_time / (sending_time + open_time)) * 100 , 2) as open_perc
 FROM CTE;
+
+-- 19. Given a table of tweet data over a specified time period, calculate the 3-day rolling average of tweets for each user. Output the user ID, tweet date, and rolling averages rounded to 2 decimal places.
+
+SELECT user_id, tweet_date,
+ROUND(AVG(tweet_count) OVER (
+PARTITION BY user_id ORDER BY tweet_date ASC
+ROWS BETWEEN 2 PRECEDING AND CURRENT ROW), 2) AS rolling_avg
+FROM tweets;
+
+-- 20. Assume you're given a table containing data on Amazon customers and their spending on products in different category, write a query to identify the top two highest-grossing products within each category in the year 2022. The output should include the category, product, and total spend.
+
+WITH CTE AS (
+  SELECT category, product, SUM(spend) AS total_spend,
+  RANK() OVER (PARTITION BY category ORDER BY product DESC) AS ranking
+  FROM product_spend
+  WHERE EXTRACT(YEAR FROM transaction_date) = 2022
+  GROUP BY category, product
+)
+SELECT category, product, total_spend
+FROM CTE WHERE ranking <= 2
+ORDER BY category, total_spend DESC;
+
+-- 22. Assume there are three Spotify tables: artists, songs, and global_song_rank, which contain information about the artists, songs, and music charts, respectively.
+-- Write a query to find the top 5 artists whose songs appear most frequently in the Top 10 of the global_song_rank table. Display the top 5 artist names in ascending order, along with their song appearance ranking.
+-- If two or more artists have the same number of song appearances, they should be assigned the same ranking, and the rank numbers should be continuous (i.e. 1, 2, 2, 3, 4, 5).
+
+WITH CTE AS (
+  SELECT artists.artist_name,
+  DENSE_RANK() OVER (ORDER BY COUNT(songs.song_id) DESC) as artist_rank
+  FROM artists
+  INNER JOIN songs ON artists.artist_id = songs.artist_id
+  INNER JOIN global_song_rank ON songs.song_id = global_song_rank.song_id
+  WHERE rank <= 10
+  GROUP BY artists.artist_name
+)
+SELECT artist_name, artist_rank
+FROM CTE 
+WHERE artist_rank <= 5;
+
+--23. New TikTok users sign up with their emails. They confirmed their signup by replying to the text confirmation to activate their accounts. Users may receive multiple text messages for account confirmation until they have confirmed their new account.
+-- A senior analyst is interested to know the activation rate of specified users in the emails table. Write a query to find the activation rate. Round the percentage to 2 decimal places.
+
+SELECT ROUND(CAST(COUNT(texts.email_id) AS DECIMAL) / COUNT(DISTINCT emails.email_id), 2) AS activation_rate
+FROM emails 
+LEFT JOIN texts ON texts.email_id = emails.email_id 
+AND texts.signup_action = 'Confirmed';
