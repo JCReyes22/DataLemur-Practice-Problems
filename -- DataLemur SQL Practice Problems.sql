@@ -161,3 +161,42 @@ FROM pharmacy_sales
 WHERE total_sales - cogs <= 0
 GROUP BY manufacturer
 ORDER BY total_loss DESC;
+
+-- 16C. Write a query to calculate the total drug sales for each manufacturer. Round the answer to the nearest million and report your results in descending order of total sales. In case of any duplicates, sort them alphabetically by the manufacturer name.
+-- Since this data will be displayed on a dashboard viewed by business stakeholders, please format your results as follows: "$36 million".
+
+SELECT manufacturer, 
+CONCAT('$', ROUND(SUM(total_sales) / 1000000), ' million') as sale
+FROM pharmacy_sales
+GROUP BY DISTINCT manufacturer
+ORDER BY SUM(total_sales) DESC;
+
+-- 17. Assume you are given the table below on Uber transactions made by users. Write a query to obtain the third transaction of every user. Output the user id, spend and transaction date.
+
+WITH CTE AS (
+  SELECT user_id, spend, transaction_date, 
+  RANK() OVER (PARTITION BY user_id ORDER BY transaction_date ASC) AS transaction_date_rank
+  FROM transactions
+  ORDER BY user_id
+)
+
+SELECT user_id, spend, transaction_date
+FROM CTE
+WHERE transaction_date_rank = 3;
+
+--18. Assume you're given tables with information on Snapchat users, including their ages and time spent sending and opening snaps.
+-- Write a query to obtain a breakdown of the time spent sending vs. opening snaps as a percentage of total time spent on these activities grouped by age group. Round the percentage to 2 decimal places in the output.
+
+WITH CTE AS (
+  SELECT age_bucket, 
+  SUM(time_spent)FILTER(WHERE activity_type = 'send') AS sending_time,
+  SUM(time_spent)FILTER(WHERE activity_type = 'open') AS open_time
+  FROM activities
+  JOIN age_breakdown ON activities.user_id = age_breakdown.user_id
+  GROUP BY age_bucket
+)
+
+SELECT age_bucket,
+ROUND((sending_time / (sending_time + open_time)) * 100 , 2) as send_perc,
+ROUND((open_time / (sending_time + open_time)) * 100 , 2) as open_perc
+FROM CTE;
