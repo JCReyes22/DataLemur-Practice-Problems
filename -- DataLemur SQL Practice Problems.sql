@@ -239,10 +239,35 @@ SELECT artist_name, artist_rank
 FROM CTE 
 WHERE artist_rank <= 5;
 
---23. New TikTok users sign up with their emails. They confirmed their signup by replying to the text confirmation to activate their accounts. Users may receive multiple text messages for account confirmation until they have confirmed their new account.
+-- 23. New TikTok users sign up with their emails. They confirmed their signup by replying to the text confirmation to activate their accounts. Users may receive multiple text messages for account confirmation until they have confirmed their new account.
 -- A senior analyst is interested to know the activation rate of specified users in the emails table. Write a query to find the activation rate. Round the percentage to 2 decimal places.
 
 SELECT ROUND(CAST(COUNT(texts.email_id) AS DECIMAL) / COUNT(DISTINCT emails.email_id), 2) AS activation_rate
 FROM emails 
 LEFT JOIN texts ON texts.email_id = emails.email_id 
 AND texts.signup_action = 'Confirmed';
+
+-- 24. A Microsoft Azure Supercloud customer is defined as a company that purchases at least one product from each product category.
+-- Write a query that effectively identifies the company ID of such Supercloud customers.
+
+SELECT customer_id FROM (
+  SELECT customer_id, COUNT(DISTINCT product_category) AS unique_categories
+  FROM customer_contracts
+  JOIN products ON customer_contracts.product_id = products.product_id
+  GROUP BY customer_id
+) AS sub
+WHERE unique_categories = (SELECT COUNT(DISTINCT product_category) FROM products);
+
+-- 25. Assume you're given a table with measurement values obtained from a Google sensor over multiple days with measurements taken multiple times within each day.
+-- Write a query to calculate the sum of odd-numbered and even-numbered measurements separately for a particular day and display the results in two different columns. Refer to the Example Output below for the desired format.
+
+SELECT measurement_day,
+SUM(measurement_value)FILTER(WHERE MOD(rank, 2) <> 0) AS odd_sum,
+SUM(measurement_value)FILTER(WHERE MOD(rank,2) = 0) AS even_sum
+FROM (
+  SELECT DATE(measurement_time) AS measurement_day, measurement_value,
+  RANK() OVER(PARTITION BY EXTRACT('Day' FROM measurement_time) ORDER BY measurement_time ASC) as rank
+  FROM measurements
+) AS sub
+GROUP BY measurement_day
+ORDER BY measurement_day ASC;
