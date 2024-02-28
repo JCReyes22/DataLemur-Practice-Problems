@@ -3,7 +3,9 @@
 
 -- 1. Given a table of candidates and their skills, you're tasked with finding the candidates best suited for an open Data Science job. You want to find candidates who are proficient in Python, Tableau, and PostgreSQL. Write a query to list the candidates who possess all of the required skills for the job. Sort the output by candidate ID in ascending order.
 
-SELECT DISTINCT candidate_id FROM candidates
+SELECT 
+  DISTINCT candidate_id 
+FROM candidates
 WHERE skill IN ('Python', 'Tableau', 'PostgreSQL') 
 GROUP BY candidate_id
 HAVING COUNT(candidate_id) = 3
@@ -12,13 +14,15 @@ ORDER BY candidate_id ASC
 -- 2. Assume you're given a table Twitter tweet data, write a query to obtain a histogram of tweets posted per user in 2022. Output the tweet count per user as the bucket and the number of Twitter users who fall into that bucket. In other words, group the users by the number of tweets they posted in 2022 and count the number of users in each group.
 
 With CTE as (
-  SELECT user_id, COUNT(tweet_id) AS tweets_num 
+  SELECT 
+    user_id, COUNT(tweet_id) AS tweets_num 
   FROM tweets 
   WHERE tweet_date BETWEEN '2022-01-01' AND '2022-12-31' 
   GROUP BY user_id
 )
-SELECT DISTINCT(tweets_num) AS tweets_bucket,
-COUNT(user_id) AS users_num
+SELECT 
+  DISTINCT(tweets_num) AS tweets_bucket,
+  COUNT(user_id) AS users_num
 FROM CTE 
 GROUP BY tweets_num;
 
@@ -42,16 +46,19 @@ WHERE finish_date IS NULL;
 
 WITH views AS (
   SELECT 
-  CASE WHEN device_type = 'laptop' THEN 1 ELSE 0 END AS laptop_views,
-  CASE WHEN device_type IN ('phone','tablet') THEN 1 ELSE 0 END AS mobile_views
+    CASE WHEN device_type = 'laptop' THEN 1 ELSE 0 END AS laptop_views,
+    CASE WHEN device_type IN ('phone','tablet') THEN 1 ELSE 0 END AS mobile_views
   FROM viewership
 )
-SELECT SUM(laptop_views) as laptop_views, SUM(mobile_views) as mobile_views
+SELECT 
+  SUM(laptop_views) as laptop_views, SUM(mobile_views) as mobile_views
 FROM views;
 
 -- 6. Given a table of Facebook posts, for each user who posted at least twice in 2021, write a query to find the number of days between each user’s first post of the year and last post of the year in the year 2021. Output the user and number of the days between each user's first and last post.
 
-SELECT user_id, MAX(CAST(post_date as DATE)) - MIN(CAST(post_date AS DATE)) AS days_between
+SELECT 
+  user_id, 
+  MAX(CAST(post_date as DATE)) - MIN(CAST(post_date AS DATE)) AS days_between
 FROM posts
 WHERE post_date BETWEEN '2021-01-01' AND '2021-12-31'
 GROUP BY user_id
@@ -59,7 +66,8 @@ HAVING COUNT(user_id) >= 2
 
 -- 7. Write a query to identify the top 2 Power Users who sent the highest number of messages on Microsoft Teams in August 2022. Display the IDs of these 2 users along with the total number of messages they sent. Output the results in descending order based on the count of the messages.
 
-SELECT DISTINCT sender_id, COUNT(sent_date) as message_count
+SELECT 
+  DISTINCT sender_id, COUNT(sent_date) as message_count
 FROM messages 
 WHERE sent_date BETWEEN '08-01-2022' AND '08-31-2022'
 GROUP BY sender_id, message_count
@@ -69,7 +77,8 @@ LIMIT 2;
 -- 8. Assume you're given a table containing job postings from various companies on the LinkedIn platform. Write a query to retrieve the count of companies that have posted duplicate job listings.
 
 WITH CTE AS (
-  SELECT company_id, title, description, COUNT(DISTINCT job_id)
+  SELECT 
+    company_id, title, description, COUNT(DISTINCT job_id)
   FROM job_listings
   GROUP BY company_id, title, description
   HAVING COUNT(DISTINCT job_id) > 1
@@ -90,7 +99,9 @@ LIMIT 3;
 
 -- 10. Given the reviews table, write a query to retrieve the average star rating for each product, grouped by month. The output should display the month as a numerical value, product ID, and average star rating rounded to two decimal places. Sort the output first by month and then by product ID.
 
-SELECT DISTINCT(EXTRACT(MONTH from submit_date)) as mth, product_id, ROUND(AVG(stars), 2) as avg_stars
+SELECT 
+  DISTINCT(EXTRACT(MONTH from submit_date)) as mth, 
+  product_id, ROUND(AVG(stars), 2) as avg_stars
 FROM reviews
 GROUP by mth, product_id
 ORDER BY mth ASC;
@@ -98,9 +109,8 @@ ORDER BY mth ASC;
 -- 11. Assume you have an events table on Facebook app analytics. Write a query to calculate the click-through rate (CTR) for the app in 2022 and round the results to 2 decimal places.
 
 SELECT app_id,
-ROUND(100.0 *
-SUM(CASE WHEN event_type = 'click' THEN 1 ELSE 0 END) /
-SUM(CASE WHEN event_type = 'impression' THEN 1 ELSE 0 END), 2)  AS ctr_rate
+  ROUND(100.0 * SUM(CASE WHEN event_type = 'click' THEN 1 ELSE 0 END) 
+  / SUM(CASE WHEN event_type = 'impression' THEN 1 ELSE 0 END), 2)  AS ctr_rate
 FROM events
 WHERE timestamp BETWEEN '2022-01-01' AND '2022-12-31'
 GROUP BY app_id;
@@ -115,8 +125,9 @@ WHERE signup_action = 'Confirmed' AND action_date = signup_date + INTERVAL '1 da
 -- 13. As a data analyst on the Oracle Sales Operations team, you are given a list of salespeople’s deals, and the annual quota they need to hit.
 -- Write a query that outputs each employee id and whether they hit the quota or not ('yes' or 'no'). Order the results by employee id in ascending order.
 
-SELECT DISTINCT deals.employee_id,
-CASE WHEN SUM(deal_size) > quota THEN 'yes' ELSE 'no' END AS made_quota
+SELECT 
+  DISTINCT deals.employee_id,
+  CASE WHEN SUM(deal_size) > quota THEN 'yes' ELSE 'no' END AS made_quota
 FROM deals
 JOIN sales_quotas ON deals.employee_id = sales_quotas.employee_id
 GROUP BY deals.employee_id, quota
@@ -125,7 +136,9 @@ ORDER BY deals.employee_id ASC;
 -- 14. Your team at JPMorgan Chase is preparing to launch a new credit card, and to gain some insights, you're analyzing how many credit cards were issued each month.
 -- Write a query that outputs the name of each credit card and the difference in the number of issued cards between the month with the highest issuance cards and the lowest issuance. Arrange the results based on the largest disparity.
 
-SELECT card_name, MAX(issued_amount) - MIN(issued_amount) AS difference
+SELECT 
+  card_name, 
+  MAX(issued_amount) - MIN(issued_amount) AS difference
 FROM monthly_cards_issued
 GROUP BY card_name
 ORDER BY difference DESC;
@@ -134,15 +147,18 @@ ORDER BY difference DESC;
 
 /*
 WITH CTE AS (
-  SELECT SUM(item_count * order_occurrences) AS total_items, 
-  SUM(order_occurrences) AS total_orders
+  SELECT 
+    SUM(item_count * order_occurrences) AS total_items, 
+    SUM(order_occurrences) AS total_orders
   FROM items_per_order
 )
 
 SELECT ROUND(CAST(total_items/total_orders AS NUMERIC), 1) FROM CTE;
 */ 
 
-SELECT ROUND(CAST(SUM(item_count * order_occurrences) / SUM(order_occurrences) AS NUMERIC), 1) AS mean
+SELECT 
+  ROUND(CAST(SUM(item_count * order_occurrences) 
+  / SUM(order_occurrences) AS NUMERIC), 1) AS mean
 FROM items_per_order;
 
 -- 16A. CVS Health is trying to better understand its pharmacy sales, and how well different products are selling. Each drug can only be produced by one manufacturer.
@@ -156,7 +172,9 @@ LIMIT 3;
 -- 16B. Write a query to identify the manufacturers associated with the drugs that resulted in losses for CVS Health and calculate the total amount of losses incurred.
 -- Output the manufacturer's name, the number of drugs associated with losses, and the total losses in absolute value. Display the results sorted in descending order with the highest losses displayed at the top.
 
-SELECT manufacturer, COUNT(drug) as drug_count, ABS(SUM(total_sales - cogs)) as total_loss
+SELECT 
+  manufacturer, 
+  COUNT(drug) as drug_count, ABS(SUM(total_sales - cogs)) as total_loss
 FROM pharmacy_sales
 WHERE total_sales - cogs <= 0
 GROUP BY manufacturer
@@ -165,8 +183,9 @@ ORDER BY total_loss DESC;
 -- 16C. Write a query to calculate the total drug sales for each manufacturer. Round the answer to the nearest million and report your results in descending order of total sales. In case of any duplicates, sort them alphabetically by the manufacturer name.
 -- Since this data will be displayed on a dashboard viewed by business stakeholders, please format your results as follows: "$36 million".
 
-SELECT manufacturer, 
-CONCAT('$', ROUND(SUM(total_sales) / 1000000), ' million') as sale
+SELECT 
+  manufacturer, 
+  CONCAT('$', ROUND(SUM(total_sales) / 1000000), ' million') as sale
 FROM pharmacy_sales
 GROUP BY DISTINCT manufacturer
 ORDER BY SUM(total_sales) DESC;
@@ -174,8 +193,9 @@ ORDER BY SUM(total_sales) DESC;
 -- 17. Assume you are given the table below on Uber transactions made by users. Write a query to obtain the third transaction of every user. Output the user id, spend and transaction date.
 
 WITH CTE AS (
-  SELECT user_id, spend, transaction_date, 
-  RANK() OVER (PARTITION BY user_id ORDER BY transaction_date ASC) AS transaction_date_rank
+  SELECT 
+    user_id, spend, transaction_date, 
+    RANK() OVER (PARTITION BY user_id ORDER BY transaction_date ASC) AS transaction_date_rank
   FROM transactions
   ORDER BY user_id
 )
@@ -188,32 +208,36 @@ WHERE transaction_date_rank = 3;
 -- Write a query to obtain a breakdown of the time spent sending vs. opening snaps as a percentage of total time spent on these activities grouped by age group. Round the percentage to 2 decimal places in the output.
 
 WITH CTE AS (
-  SELECT age_bucket, 
-  SUM(time_spent)FILTER(WHERE activity_type = 'send') AS sending_time,
-  SUM(time_spent)FILTER(WHERE activity_type = 'open') AS open_time
+  SELECT 
+    age_bucket, 
+    SUM(time_spent)FILTER(WHERE activity_type = 'send') AS sending_time,
+    SUM(time_spent)FILTER(WHERE activity_type = 'open') AS open_time
   FROM activities
   JOIN age_breakdown ON activities.user_id = age_breakdown.user_id
   GROUP BY age_bucket
 )
 
-SELECT age_bucket,
-ROUND((sending_time / (sending_time + open_time)) * 100 , 2) as send_perc,
-ROUND((open_time / (sending_time + open_time)) * 100 , 2) as open_perc
+SELECT 
+  age_bucket,
+  ROUND((sending_time / (sending_time + open_time)) * 100 , 2) as send_perc,
+  ROUND((open_time / (sending_time + open_time)) * 100 , 2) as open_perc
 FROM CTE;
 
 -- 19. Given a table of tweet data over a specified time period, calculate the 3-day rolling average of tweets for each user. Output the user ID, tweet date, and rolling averages rounded to 2 decimal places.
 
-SELECT user_id, tweet_date,
-ROUND(AVG(tweet_count) OVER (
-PARTITION BY user_id ORDER BY tweet_date ASC
-ROWS BETWEEN 2 PRECEDING AND CURRENT ROW), 2) AS rolling_avg
+SELECT 
+  user_id, tweet_date,
+  ROUND(AVG(tweet_count) OVER 
+  (PARTITION BY user_id ORDER BY tweet_date ASC 
+  ROWS BETWEEN 2 PRECEDING AND CURRENT ROW), 2) AS rolling_avg
 FROM tweets;
 
 -- 20. Assume you're given a table containing data on Amazon customers and their spending on products in different category, write a query to identify the top two highest-grossing products within each category in the year 2022. The output should include the category, product, and total spend.
 
 WITH CTE AS (
-  SELECT category, product, SUM(spend) AS total_spend,
-  RANK() OVER (PARTITION BY category ORDER BY product DESC) AS ranking
+  SELECT 
+    category, product, SUM(spend) AS total_spend,
+    RANK() OVER (PARTITION BY category ORDER BY product DESC) AS ranking
   FROM product_spend
   WHERE EXTRACT(YEAR FROM transaction_date) = 2022
   GROUP BY category, product
@@ -227,8 +251,9 @@ ORDER BY category, total_spend DESC;
 -- If two or more artists have the same number of song appearances, they should be assigned the same ranking, and the rank numbers should be continuous (i.e. 1, 2, 2, 3, 4, 5).
 
 WITH CTE AS (
-  SELECT artists.artist_name,
-  DENSE_RANK() OVER (ORDER BY COUNT(songs.song_id) DESC) as artist_rank
+  SELECT 
+    artists.artist_name,
+    DENSE_RANK() OVER (ORDER BY COUNT(songs.song_id) DESC) as artist_rank
   FROM artists
   INNER JOIN songs ON artists.artist_id = songs.artist_id
   INNER JOIN global_song_rank ON songs.song_id = global_song_rank.song_id
@@ -242,7 +267,9 @@ WHERE artist_rank <= 5;
 -- 23. New TikTok users sign up with their emails. They confirmed their signup by replying to the text confirmation to activate their accounts. Users may receive multiple text messages for account confirmation until they have confirmed their new account.
 -- A senior analyst is interested to know the activation rate of specified users in the emails table. Write a query to find the activation rate. Round the percentage to 2 decimal places.
 
-SELECT ROUND(CAST(COUNT(texts.email_id) AS DECIMAL) / COUNT(DISTINCT emails.email_id), 2) AS activation_rate
+SELECT 
+  ROUND(CAST(COUNT(texts.email_id) AS DECIMAL) 
+  / COUNT(DISTINCT emails.email_id), 2) AS activation_rate
 FROM emails 
 LEFT JOIN texts ON texts.email_id = emails.email_id 
 AND texts.signup_action = 'Confirmed';
@@ -251,7 +278,8 @@ AND texts.signup_action = 'Confirmed';
 -- Write a query that effectively identifies the company ID of such Supercloud customers.
 
 SELECT customer_id FROM (
-  SELECT customer_id, COUNT(DISTINCT product_category) AS unique_categories
+  SELECT 
+    customer_id, COUNT(DISTINCT product_category) AS unique_categories
   FROM customer_contracts
   JOIN products ON customer_contracts.product_id = products.product_id
   GROUP BY customer_id
@@ -265,9 +293,65 @@ SELECT measurement_day,
 SUM(measurement_value)FILTER(WHERE MOD(rank, 2) <> 0) AS odd_sum,
 SUM(measurement_value)FILTER(WHERE MOD(rank,2) = 0) AS even_sum
 FROM (
-  SELECT DATE(measurement_time) AS measurement_day, measurement_value,
-  RANK() OVER(PARTITION BY EXTRACT('Day' FROM measurement_time) ORDER BY measurement_time ASC) as rank
+  SELECT 
+    DATE(measurement_time) AS measurement_day, measurement_value,
+    RANK() OVER(PARTITION BY EXTRACT('Day' FROM measurement_time) ORDER BY measurement_time ASC) AS rank
   FROM measurements
 ) AS sub
 GROUP BY measurement_day
 ORDER BY measurement_day ASC;
+
+-- 26. Assume you're given a table on Walmart user transactions. Based on their most recent transaction date, write a query that retrieve the users along with the number of products they bought.
+-- Output the user's most recent transaction date, user ID, and the number of products, sorted in chronological order by the transaction date.
+
+WITH CTE AS (
+  SELECT 
+    RANK() OVER (PARTITION BY user_id ORDER BY transaction_date DESC) as rank,
+    transaction_date, user_id, COUNT(product_id) as purchase_count
+  FROM user_transactions
+  GROUP BY transaction_date, user_id
+  ORDER BY transaction_date ASC
+)
+
+SELECT transaction_date, user_id, purchase_count 
+FROM CTE WHERE rank = 1;
+
+-- 27. You're given a table containing the item count for each order on Alibaba, along with the frequency of orders that have the same item count. Write a query to retrieve the mode of the order occurrences. Additionally, if there are multiple item counts with the same mode, the results should be sorted in ascending order.
+
+SELECT item_count as mode FROM items_per_order 
+WHERE order_occurrences = (
+  SELECT MAX(order_occurrences) FROM items_per_order
+)
+ORDER BY mode ASC;
+
+-- 28. Your team at JPMorgan Chase is soon launching a new credit card. You are asked to estimate how many cards you'll issue in the first month.
+-- Before you can answer this question, you want to first get some perspective on how well new credit card launches typically do in their first month.
+-- Write a query that outputs the name of the credit card, and how many cards were issued in its launch month. The launch month is the earliest record in the monthly_cards_issued table for a given card. Order the results starting from the biggest issued amount.
+
+WITH CTE AS (
+  SELECT 
+    card_name, issued_amount,
+    MAKE_DATE(issue_year, issue_month, 1) AS issue_date,
+    MIN(MAKE_DATE(issue_year, issue_month, 1)) OVER (PARTITION BY card_name) AS launch_date
+  FROM monthly_cards_issued
+  ORDER BY card_name, issue_month ASC
+)
+
+SELECT card_name, issued_amount 
+FROM CTE 
+WHERE issue_date = launch_date
+ORDER BY issued_amount DESC;
+
+
+-- 29. A phone call is considered an international call when the person calling is in a different country than the person receiving the call.
+-- What percentage of phone calls are international? Round the result to 1 decimal.
+
+SELECT 
+  ROUND(100.0 * COUNT(*) FILTER (WHERE caller.country_id <> receiver.country_id)
+  / COUNT(*), 1) AS international_calls_pct
+FROM 
+  phone_calls AS calls
+LEFT JOIN phone_info AS caller 
+  ON calls.caller_id = caller.caller_id
+LEFT JOIN phone_info AS receiver
+  ON calls.receiver_id = receiver.caller_id;
